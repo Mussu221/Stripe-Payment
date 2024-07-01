@@ -21,7 +21,6 @@ stripe.api_key = os.getenv('STRIPE_KEY')
 class CreateStripeAccount(Resource):
     def post(self):
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY') # Ensure to set your Stripe secret key here
             account = stripe.Account.create(
                 type='express',
                 # country='IN',
@@ -42,7 +41,6 @@ class VerifyStripeAccount(Resource):
     @token_required
     def get(self, account_id):
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             account = stripe.Account.retrieve(account_id)
             capabilities = account.get('capabilities', {})
             card_payments_enabled = capabilities.get('card_payments', 'inactive') == 'active'
@@ -70,7 +68,6 @@ class AccountLink(Resource):
             return {'status': 0, 'message': 'Validation failed', 'error': errors}, 400
 
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY') # Ensure to set your Stripe secret key here
             account_id = json_data['account_id']
             account_link = stripe.AccountLink.create(
                 account=account_id,
@@ -119,7 +116,6 @@ class CreateCustomer(Resource):
             return {'status': 0, 'message': 'Validation failed', 'error': errors}, 400
 
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             customer = stripe.Customer.create(email=json_data['email'])
             return {'status': 1, 'message': 'Customer created', 'data': customer.id}
         except Exception as e:
@@ -131,7 +127,6 @@ class RetrieveCustomer(Resource):
     
     def get(self, customer_id):
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             customer = stripe.Customer.retrieve(customer_id)
             return {'status': 1, 'message': 'Customer retrieved', 'data': customer.to_dict()}
         except Exception as e:
@@ -150,7 +145,6 @@ class AddCard(Resource):
             return {'status': 0, 'message': 'Validation failed', 'error': errors}, 400
 
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             card = stripe.Customer.create_source(
                 json_data['customer_id'],
                 source=json_data['card_token']
@@ -164,7 +158,6 @@ class ListCards(Resource):
     
     def get(self, customer_id):
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             cards = stripe.Customer.list_sources(
                 customer_id,
                 object='card'
@@ -191,7 +184,6 @@ class CreateCheckoutSession(Resource):
         cancel_url = 'http://127.0.0.1:5000/payment_failed'
         
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
@@ -226,7 +218,6 @@ class RetrieveCustomerPayments(Resource):
     
     def get(self, customer_id):
         try:
-            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             # Retrieve the list of PaymentIntents for the customer
             payment_intents = stripe.PaymentIntent.list(customer=customer_id)
             return jsonify({'status': 1, 'message': 'Payments retrieved', 'data': [pi.to_dict() for pi in payment_intents['data']]})
@@ -240,7 +231,6 @@ class RetrieveSellerTransfers(Resource):
     def get(self, seller_account_id):
         try:
             # Retrieve the list of transfers for the seller account
-            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             transfers = stripe.Transfer.list(destination=seller_account_id)
             return jsonify({'status': 1, 'message': 'Transfers retrieved', 'data': [transfer.to_dict() for transfer in transfers['data']]})
         except Exception as e:
