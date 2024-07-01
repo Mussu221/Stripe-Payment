@@ -16,21 +16,12 @@ ma.init_app(app)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 stripe.api_key = os.getenv('STRIPE_KEY')
 
-# class CreateStripeAccount(Resource):
-#     @token_required
-#     def post(self):
-#         try:
-#             stripe.api_key = "sk_test_51MedQAFCatXUefOh5YoHZamJvE2apZyfuYtTQ4KgJDrHdsXBwuRX1h5jdoj9ldrY3yeBBVj544OCDUdXQ2vM0d8A004PyLWhtK" #os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
-#             account = stripe.Account.create(type='express')
-#             return {'status': 1, 'message': 'Account created', 'data': account.to_dict()}
-#         except Exception as e:
-#             return {'status': 0, 'message': 'Something went wrong', 'error': str(e)}, 400
 
 
 class CreateStripeAccount(Resource):
     def post(self):
         try:
-            stripe.api_key = "sk_test_51MedQAFCatXUefOh5YoHZamJvE2apZyfuYtTQ4KgJDrHdsXBwuRX1h5jdoj9ldrY3yeBBVj544OCDUdXQ2vM0d8A004PyLWhtK" #os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
+            stripe.api_key = os.getenv('STRIPE_KEY') # Ensure to set your Stripe secret key here
             account = stripe.Account.create(
                 type='express',
                 # country='IN',
@@ -45,24 +36,13 @@ class CreateStripeAccount(Resource):
 
 
 
-# class VerifyStripeAccount(Resource):
-#     @token_required
-    
-#     def get(self, account_id):
-#         try:
-#             stripe.api_key = "sk_test_51MedQAFCatXUefOh5YoHZamJvE2apZyfuYtTQ4KgJDrHdsXBwuRX1h5jdoj9ldrY3yeBBVj544OCDUdXQ2vM0d8A004PyLWhtK" #os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
-            
-#             account = stripe.Account.retrieve(account_id)
-#             return {'status': 1, 'message': 'Account retrieved', 'data': account.to_dict()}
-#         except Exception as e:
-#             return {'status': 0, 'message': 'Something went wrong', 'error': str(e)}, 400
 
 
 class VerifyStripeAccount(Resource):
     @token_required
     def get(self, account_id):
         try:
-            stripe.api_key = "sk_test_51MedQAFCatXUefOh5YoHZamJvE2apZyfuYtTQ4KgJDrHdsXBwuRX1h5jdoj9ldrY3yeBBVj544OCDUdXQ2vM0d8A004PyLWhtK"  # Ensure to set your Stripe secret key here
+            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             
             account = stripe.Account.retrieve(account_id)
             capabilities = account.get('capabilities', {})
@@ -91,7 +71,7 @@ class AccountLink(Resource):
             return {'status': 0, 'message': 'Validation failed', 'error': errors}, 400
 
         try:
-            stripe.api_key = "sk_test_51MedQAFCatXUefOh5YoHZamJvE2apZyfuYtTQ4KgJDrHdsXBwuRX1h5jdoj9ldrY3yeBBVj544OCDUdXQ2vM0d8A004PyLWhtK" #os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
+            stripe.api_key = os.getenv('STRIPE_KEY') # Ensure to set your Stripe secret key here
             
             account_id = json_data['account_id']
             account_link = stripe.AccountLink.create(
@@ -243,7 +223,7 @@ class RetrieveCustomerPayments(Resource):
     
     def get(self, customer_id):
         try:
-            stripe.api_key = "sk_test_51MedQAFCatXUefOh5YoHZamJvE2apZyfuYtTQ4KgJDrHdsXBwuRX1h5jdoj9ldrY3yeBBVj544OCDUdXQ2vM0d8A004PyLWhtK"  # Ensure to set your Stripe secret key here
+            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             # Retrieve the list of PaymentIntents for the customer
             payment_intents = stripe.PaymentIntent.list(customer=customer_id)
             return jsonify({'status': 1, 'message': 'Payments retrieved', 'data': [pi.to_dict() for pi in payment_intents['data']]})
@@ -257,6 +237,7 @@ class RetrieveSellerTransfers(Resource):
     def get(self, seller_account_id):
         try:
             # Retrieve the list of transfers for the seller account
+            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             transfers = stripe.Transfer.list(destination=seller_account_id)
             return jsonify({'status': 1, 'message': 'Transfers retrieved', 'data': [transfer.to_dict() for transfer in transfers['data']]})
         except Exception as e:
