@@ -43,7 +43,6 @@ class VerifyStripeAccount(Resource):
     def get(self, account_id):
         try:
             stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
-            
             account = stripe.Account.retrieve(account_id)
             capabilities = account.get('capabilities', {})
             card_payments_enabled = capabilities.get('card_payments', 'inactive') == 'active'
@@ -72,7 +71,6 @@ class AccountLink(Resource):
 
         try:
             stripe.api_key = os.getenv('STRIPE_KEY') # Ensure to set your Stripe secret key here
-            
             account_id = json_data['account_id']
             account_link = stripe.AccountLink.create(
                 account=account_id,
@@ -121,6 +119,7 @@ class CreateCustomer(Resource):
             return {'status': 0, 'message': 'Validation failed', 'error': errors}, 400
 
         try:
+            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             customer = stripe.Customer.create(email=json_data['email'])
             return {'status': 1, 'message': 'Customer created', 'data': customer.id}
         except Exception as e:
@@ -132,6 +131,7 @@ class RetrieveCustomer(Resource):
     
     def get(self, customer_id):
         try:
+            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             customer = stripe.Customer.retrieve(customer_id)
             return {'status': 1, 'message': 'Customer retrieved', 'data': customer.to_dict()}
         except Exception as e:
@@ -150,6 +150,7 @@ class AddCard(Resource):
             return {'status': 0, 'message': 'Validation failed', 'error': errors}, 400
 
         try:
+            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             card = stripe.Customer.create_source(
                 json_data['customer_id'],
                 source=json_data['card_token']
@@ -163,6 +164,7 @@ class ListCards(Resource):
     
     def get(self, customer_id):
         try:
+            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             cards = stripe.Customer.list_sources(
                 customer_id,
                 object='card'
@@ -189,6 +191,7 @@ class CreateCheckoutSession(Resource):
         cancel_url = 'http://127.0.0.1:5000/payment_failed'
         
         try:
+            stripe.api_key = os.getenv('STRIPE_KEY')  # Ensure to set your Stripe secret key here
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
